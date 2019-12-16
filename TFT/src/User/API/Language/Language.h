@@ -24,6 +24,8 @@ enum
   LANGUAGE_NUM,
 };
 
+// ipatch NOTE, order is IMPORTANT, no addtional items can be added.
+
 enum
 {
   LABEL_LANGUAGE =0,
