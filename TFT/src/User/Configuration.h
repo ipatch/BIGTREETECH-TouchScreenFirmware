@@ -38,19 +38,9 @@
 // ipatch NOTE, `"T2:" is only "defined" within this file
 
 //                       PLA      PETG       ABS     "CUSTOM1" "CUSTOM2"
-<<<<<<< HEAD
 #define PREHEAT_BED      {60,      70,       100,       60,       55}
 #define PREHEAT_HOTEND   {165,     250,      230,       165,      200}
 #define PREHEAT_TEXT     {"PLA",  "PETG",   "ABS",     "T2:",    "T3:"}
-||||||| c425bb2
-#define PREHEAT_BED      {60,      70,       100,       55,       55}
-#define PREHEAT_HOTEND   {200,     250,      230,       200,      200}
-#define PREHEAT_TEXT     {"PLA",  "PETG",   "ABS",     "T2:",    "T3:"}
-=======
-#define PREHEAT_BED      {60,      70,       60,       55,       55}
-#define PREHEAT_HOTEND   {165,     250,      205,       200,      200}
-#define PREHEAT_TEXT     {"PREPARE",  "PETG",   "PLA",     "T2:",    "T3:"}
->>>>>>> 002bcc7a9d2a5c70be300262a226f870cc14bdd6
 
 #define HEAT_MAX_TEMP    {150,    275,       275,       275,       275,       275,       275}    //max temperature can be set
 #define HEAT_SIGN_ID     {"B:",   "T0:",     "T1:",     "T2:",     "T3:",     "T4:",     "T5:"}
