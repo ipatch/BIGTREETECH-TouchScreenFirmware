@@ -46,7 +46,7 @@ void menuPreheat(void)
   static TOOLPREHEAT nowHeater = BOTH;
   KEY_VALUES  key_num = KEY_IDLE;
 
-  menuDrawPage(&preheatItems,false);
+  menuDrawPage(&preheatItems);
 
   while(infoMenu.menu[infoMenu.cur] == menuPreheat)
   {
