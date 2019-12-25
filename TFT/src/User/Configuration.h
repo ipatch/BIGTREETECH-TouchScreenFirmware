@@ -134,7 +134,7 @@
 //#define INVERT_YAXIS
 
 //Invert the Z Axis move Direction
-//#define INVERT_ZAXIS
+#define INVERT_ZAXIS
 
 // Enable Unified Move Menu
 // Move, Home, Extrude, ABL at one Place and bring Gcode Menu on Home Menu
