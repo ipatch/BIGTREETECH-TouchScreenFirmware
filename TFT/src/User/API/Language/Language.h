@@ -179,6 +179,7 @@ enum
   LABEL_INVERT_ZAXIS,
   LABEL_MOVE_SPEED,
   LABEL_KNOB_LED,
+  LABEL_M0_PAUSE,
 
   //add new keywords above this line only
   //keep the following always at the end of this list
