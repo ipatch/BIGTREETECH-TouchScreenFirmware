@@ -43,15 +43,15 @@
       #define LED_color_NUM 9
        const ITEM itemLedcolor[LED_color_NUM] = {
        // icon                       label
-         {ICON_LEDCOLOR,             LABEL_LEDOFF},
-         {ICON_LEDCOLOR,             LABEL_LEDWHITE},
-         {ICON_LEDCOLOR,             LABEL_LEDRED},
-         {ICON_LEDCOLOR,             LABEL_LEDORANGE},
-         {ICON_LEDCOLOR,             LABEL_LEDYELLOW},
-         {ICON_LEDCOLOR,             LABEL_LEDGREEN},  
-         {ICON_LEDCOLOR,             LABEL_LEDBLUE},
-         {ICON_LEDCOLOR,             LABEL_LEDINDIGO},
-         {ICON_LEDCOLOR,             LABEL_LEDVIOLET},
+         {ICON_LEDCOLOR,             LABEL_OFF},
+         {ICON_LEDCOLOR,             LABEL_WHITE},
+         {ICON_LEDCOLOR,             LABEL_RED},
+         {ICON_LEDCOLOR,             LABEL_ORANGE},
+         {ICON_LEDCOLOR,             LABEL_YELLOW},
+         {ICON_LEDCOLOR,             LABEL_GREEN},  
+         {ICON_LEDCOLOR,             LABEL_BLUE},
+         {ICON_LEDCOLOR,             LABEL_INDIGO},
+         {ICON_LEDCOLOR,             LABEL_VIOLET},
        };
 
        const  uint32_t led_color[LED_color_NUM] = {
@@ -176,6 +176,9 @@
 //
 //setup item states
 //
+    const uint16_t toggleitem[2] = {ICONCHAR_TOGGLE_OFF,ICONCHAR_TOGGLE_ON};
+    const  u8  item_toggleState[2]    = {0, 1};
+    
     #ifdef PS_ON_PIN
       #define ITEM_PS_ON_NUM 2
       const LISTITEM itemPowerOff[ITEM_PS_ON_NUM] = {
@@ -209,9 +212,33 @@
     };
     const  u8 item_movespeed[ITEM_SPEED_NUM] = {LABEL_NORMAL_SPEED, LABEL_SLOW_SPEED, LABEL_FAST_SPEED};
 
-    const uint16_t toggleitem[2] = {ICONCHAR_TOGGLE_OFF,ICONCHAR_TOGGLE_ON};
-    const  u8  item_toggleState[2]    = {0, 1};
+    #ifdef LED_color_PIN
+      #define LED_color_NUM 9
+      const LISTITEM itemLedcolor[LED_color_NUM] = {
+      // icon                       label
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_OFF},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_WHITE},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_RED},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_ORANGE},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_YELLOW},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_GREEN},  
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_BLUE},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_INDIGO},
+        {ICONCHAR_BLANK, LIST_CUSTOMVALUE, LABEL_KNOB_LED, LABEL_VIOLET},
+      };
+      const  uint32_t led_color[LED_color_NUM] = {
+                                        LED_OFF,
+                                        LED_WHITE,
+                                        LED_RED,
+                                        LED_ORANGE,
+                                        LED_YELLOW,
+                                        LED_GREEN,
+                                        LED_BLUE,
+                                        LED_INDIGO,
+                                        LED_VIOLET
+                                        };
 
+    #endif
 //
 //add key number index of the items
 //
@@ -227,6 +254,9 @@
         SKEY_RUNOUT,
       #endif
       SKEY_SPEED,
+      #ifdef LED_color_PIN
+      SKEY_KNOB,
+      #endif
       SKEY_COUNT //keep this always at the end
     }SKEY_LIST; 
     
@@ -246,7 +276,10 @@
       #ifdef FIL_RUNOUT_PIN
       {ICONCHAR_TOGGLE_ON,  LIST_CUSTOMVALUE,   LABEL_FILAMENT_RUNOUT,    LABEL_OFF       },
       #endif
-      {ICONCHAR_TOGGLE_ON,  LIST_CUSTOMVALUE,   LABEL_MOVE_SPEED,   LABEL_NORMAL_SPEED},
+      {ICONCHAR_TOGGLE_ON,  LIST_CUSTOMVALUE,   LABEL_MOVE_SPEED,         LABEL_NORMAL_SPEED},
+      #ifdef LED_color_PIN
+      {ICONCHAR_BLANK,      LIST_CUSTOMVALUE,   LABEL_KNOB_LED,           LABEL_OFF       },
+      #endif
       
     };
 
@@ -255,28 +288,25 @@
 //
     void updateFeatureSettings(uint8_t key_val)
     {
-      uint8_t item_index = fe_cur_page*FE_PAGE_COUNT+ key_val;
+      uint8_t item_index = fe_cur_page*LISTITEM_PER_PAGE+ key_val;
       switch (item_index)
       {
         case SKEY_HIDEACK:
         infoSettings.terminalACK = (infoSettings.terminalACK + 1) % 2;
         settingPage[item_index].icon = toggleitem[infoSettings.terminalACK];
-        featureSettingsItems.items[key_val].icon = toggleitem[infoSettings.terminalACK];;
-        menuDrawListItem(&featureSettingsItems.items[key_val], key_val);
+        featureSettingsItems.items[key_val].icon = toggleitem[infoSettings.terminalACK];
         break;
 
         case SKEY_INVERT_Y:
         infoSettings.invert_yaxis = (infoSettings.invert_yaxis + 1) % 2;
         settingPage[item_index].icon = toggleitem[infoSettings.invert_yaxis];
         featureSettingsItems.items[key_val] = settingPage[item_index];
-        menuDrawListItem(&featureSettingsItems.items[key_val], key_val);
         break;
 
         case SKEY_INVERT_Z:
-        infoSettings.invert_yaxis = (infoSettings.invert_yaxis + 1) % 2;
-        settingPage[item_index].icon = toggleitem[infoSettings.invert_yaxis];
+        infoSettings.invert_zaxis = (infoSettings.invert_zaxis + 1) % 2;
+        settingPage[item_index].icon = toggleitem[infoSettings.invert_zaxis];
         featureSettingsItems.items[key_val] = settingPage[item_index];
-        menuDrawListItem(&featureSettingsItems.items[key_val], key_val);
         break;
 
         #ifdef PS_ON_PIN
@@ -284,7 +314,6 @@
         item_power_off_i = (item_power_off_i + 1) % ITEM_PS_ON_NUM;
         settingPage[item_index] = itemPowerOff[item_power_off_i];
         featureSettingsItems.items[key_val] = settingPage[item_index];
-        menuDrawListItem(&featureSettingsItems.items[key_val], key_val);
         infoSettings.auto_off = item_power_off[item_power_off_i];
         break;
         #endif
@@ -294,7 +323,6 @@
         item_runout_i = (item_runout_i + 1) % ITEM_RUNOUT_NUM;
         settingPage[item_index] = itemRunout[item_runout_i];
         featureSettingsItems.items[key_val] = settingPage[item_index];
-        menuDrawListItem(&featureSettingsItems.items[key_val], key_val);
         infoSettings.runout = item_runout[item_runout_i];
         break;
         #endif
@@ -303,8 +331,17 @@
         infoSettings.move_speed = (infoSettings.move_speed + 1) % ITEM_SPEED_NUM;
         settingPage[item_index] = itemMoveSpeed[infoSettings.move_speed];
         featureSettingsItems.items[key_val] = settingPage[item_index];
-        menuDrawListItem(&featureSettingsItems.items[key_val], key_val);
         break;
+
+        #ifdef LED_color_PIN
+        case SKEY_KNOB:            
+        infoSettings.led_color = (infoSettings.led_color + 1) % LED_color_NUM;                
+        settingPage[item_index] = itemLedcolor[infoSettings.led_color];
+        featureSettingsItems.items[key_val] = settingPage[item_index];
+        ws2812_send_DAT(led_color[infoSettings.led_color]);
+        break;
+        #endif
+
       default:
         break;
       }
@@ -316,25 +353,25 @@
     void loadFeatureSettings(){
       for (uint8_t i = 0; i < LISTITEM_PER_PAGE; i++)
       {
-        uint8_t item_index = fe_cur_page*FE_PAGE_COUNT + i;
+        uint8_t item_index = fe_cur_page*LISTITEM_PER_PAGE + i;
         switch (item_index)
         {
           case SKEY_HIDEACK:
             //item_terminalACK_i = infoSettings.terminalACK;
-            settingPage[SKEY_HIDEACK].icon = toggleitem[infoSettings.terminalACK];
-            featureSettingsItems.items[i] = settingPage[SKEY_HIDEACK];
+            settingPage[item_index].icon = toggleitem[infoSettings.terminalACK];
+            featureSettingsItems.items[i] = settingPage[item_index];
             break;
 
           case SKEY_INVERT_Y:
             //item_invert_yaxis_i = infoSettings.invert_yaxis;
-            settingPage[SKEY_INVERT_Y].icon = toggleitem[infoSettings.invert_yaxis];
-            featureSettingsItems.items[i] = settingPage[SKEY_INVERT_Y];
+            settingPage[item_index].icon = toggleitem[infoSettings.invert_yaxis];
+            featureSettingsItems.items[i] = settingPage[item_index];
             break;
 
           case SKEY_INVERT_Z:
             //item_invert_zaxis_i = infoSettings.invert_zaxis;
-            settingPage[SKEY_INVERT_Z].icon = toggleitem[infoSettings.invert_yaxis];
-            featureSettingsItems.items[i] = settingPage[SKEY_INVERT_Z];
+            settingPage[item_index].icon = toggleitem[infoSettings.invert_zaxis];
+            featureSettingsItems.items[i] = settingPage[item_index];
             break;
 
           #ifdef PS_ON_PIN
@@ -362,6 +399,14 @@
           case SKEY_SPEED:
               featureSettingsItems.items[i] = itemMoveSpeed[infoSettings.move_speed];
             break;
+
+          #ifdef LED_color_PIN
+            case SKEY_KNOB:                           
+            settingPage[item_index] = itemLedcolor[infoSettings.led_color];
+            featureSettingsItems.items[i] = settingPage[item_index];
+            break;
+          #endif
+
           default:
             settingPage[item_index].icon = ICONCHAR_BACKGROUND;
             featureSettingsItems.items[i] = settingPage[item_index];
@@ -390,8 +435,11 @@
           featureSettingsItems.items[6].icon = ICONCHAR_PAGEDOWN;
         }
       }
+      //menuDrawListItem(&featureSettingsItems.items[5],5);
+      //menuDrawListItem(&featureSettingsItems.items[6],6);
       
     }
+
 
     void menuFeatureSettings(void)
     {
@@ -411,22 +459,29 @@
             if (fe_cur_page > 0){
               fe_cur_page--;
               loadFeatureSettings();
+              menuRefreshListPage();
             }
           }
           break;
+
         case KEY_ICON_6:
           if(FE_PAGE_COUNT > 1){
-            if (fe_cur_page < FE_PAGE_COUNT){
+            if (fe_cur_page < FE_PAGE_COUNT - 1){
               fe_cur_page++;
               loadFeatureSettings();
+              menuRefreshListPage();
             }
           }
           break;
+
         case KEY_ICON_7:
           infoMenu.cur--;
           break;
         default:
+          if(key_num < LISTITEM_PER_PAGE){
           updateFeatureSettings(key_num);
+          menuDrawListItem(&featureSettingsItems.items[key_num],key_num);
+          }
           break;
         }
 
